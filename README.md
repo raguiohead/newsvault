@@ -1,12 +1,14 @@
 # 🛡️ NewsVault
 
-NewsVault is a performant local web application designed to automatically catalog and read your collection of PDF-based newsletters. It parses PDF documents, extracts their content, and presents them in a beautiful, dynamic, and glassmorphism-themed frontend.
+NewsVault is a performant, 100% client-side web application designed to automatically catalog and read your collection of PDF-based newsletters. It parses PDF documents directly in your browser, extracting their content, and presents them in a beautiful, accessible, glassmorphism-themed frontend.
 
 ## Key Features
 
-- **Automated PDF Parsing**: Automatically extracts text, themes, authors, and dates from PDF newsletters.
+- **100% Client-Side Architecture**: No backend required. Your PDFs never leave your machine, ensuring maximum privacy and security.
+- **In-Browser PDF Parsing**: Uses `pdf.js` to automatically extract text, themes, authors, and dates from PDF newsletters securely in the browser.
+- **Persistent Local Storage**: Data is saved locally using IndexedDB, so your library is always available instantly.
 - **Dynamic Frontend**: Modern React interface with fluid GSAP animations.
-- **Local-First Architecture**: Runs entirely on your local machine for privacy and speed.
+- **Accessible Design**: Compliant with Vercel Web Interface Guidelines. Features `Google Sans` typography, semantic HTML elements (`role`, `aria-label`), visible focus states, and high contrast support.
 - **Side-Drawer Reader**: Clean, distraction-free reading experience for your newsletters.
 
 ## Tech Stack
@@ -14,16 +16,15 @@ NewsVault is a performant local web application designed to automatically catalo
 - **Language**: JavaScript (ES6+ Modules)
 - **Frontend**: React 18 with Vite
 - **Animations**: GSAP (GreenSock)
-- **Backend**: Express.js
-- **PDF Extraction**: pdf-parse
-- **Process Management**: concurrently
+- **Storage**: IndexedDB (via `idb`)
+- **PDF Extraction**: `pdfjs-dist` (running in-browser)
 
 ## Prerequisites
 
-- Node.js 18 or higher
+- Node.js 18 or higher (only for local development/building)
 - npm (comes with Node.js)
 
-## Getting Started
+## Getting Started (Local Development)
 
 ### 1. Clone the Repository
 
@@ -38,21 +39,15 @@ cd newsvault
 npm install
 ```
 
-### 3. Add Your Newsletters
-
-Place your PDF files inside the `docs/` (or `pdfs/`) folder at the root of the project.
-
-### 4. Start the Application
-
-To parse the PDFs and start both the backend and frontend servers simultaneously:
+### 3. Start the Development Server
 
 ```bash
-npm start
+npm run dev
 ```
 
-### 5. Access the App
+### 4. Access the App
 
-Open [http://localhost:5173](http://localhost:5173) in your browser. The backend API will be running at `http://localhost:3001`.
+Open [http://localhost:5173](http://localhost:5173) in your browser. Since it is 100% client-side, the app will guide you to upload your PDFs directly through the interface!
 
 ## Architecture
 
@@ -60,89 +55,67 @@ Open [http://localhost:5173](http://localhost:5173) in your browser. The backend
 
 ```text
 newsvault/
-├── docs/                # Place your PDF newsletters here (or in pdfs/)
-├── pdfs/                # Alternative folder for PDF newsletters
-├── public/              # Static assets and generated data.json
-├── scripts/             # Automation scripts
-│   └── parse-pdfs.js    # Extracts data from PDFs to data.json
-├── server/              # Express backend server
-│   └── server.js        # API endpoints and static file serving
+├── public/              # Static assets
 ├── src/                 # React frontend source code
 │   ├── components/      # Reusable UI components (ArticleCard, ArticleDrawer, etc.)
+│   ├── db.js            # IndexedDB configuration and wrapper
+│   ├── pdfParser.js     # In-browser PDF parsing logic (pdf.js)
 │   ├── App.jsx          # Main application component
 │   └── main.jsx         # React entry point
 ├── package.json         # Project metadata and scripts
 └── vite.config.js       # Vite bundler configuration
 ```
 
-### Request Lifecycle
+### Request Lifecycle & Data Flow
 
-1. PDFs are added to the `docs/` or `pdfs/` folder.
-2. Running `npm run parse` executes `scripts/parse-pdfs.js`, which reads the PDFs, extracts the text using `pdf-parse`, and generates a `data.json` file inside the `public/` directory.
-3. The Express backend (`server/server.js`) serves this `data.json` via the `/api/articles` endpoint.
-4. The React frontend fetches the data from the API and renders the articles using the `ArticleGrid` and `ArticleCard` components.
-5. Users can view the full content in the `ArticleDrawer`.
+1. User clicks "+ Adicionar PDFs" in the browser and selects local PDF files.
+2. The React frontend passes the files to `src/pdfParser.js`.
+3. `pdf.js` reads the file buffer directly in the browser memory and extracts the text content and metadata.
+4. The extracted metadata and content are saved to the browser's native database (`IndexedDB`) via `src/db.js`.
+5. The React state updates, reading from IndexedDB, and renders the articles using the `ArticleGrid` and `ArticleCard` components.
+6. The user can view the full content in the `ArticleDrawer`.
 
-### Data Flow
-
-```text
-PDF Files → parse-pdfs.js → public/data.json
-                                  ↓
-Express Server (/api/articles) ← React Frontend (Fetch)
-                                  ↓
-                             Article Components
-```
-
-### Key Components
-
-**Backend (Express)**
-- Serves the parsed data (`/api/articles`).
-- Provides an endpoint to trigger re-indexing dynamically (`/api/reindex`).
-- Serves static PDF files directly to the frontend (`/pdfs`).
-
-**Frontend (React)**
-- `ArticleGrid` & `ArticleCard`: Displays the catalog of newsletters.
-- `ArticleDrawer`: A side-drawer component for reading the selected newsletter.
-- `FilterBar`: Allows users to filter the content by author, date, or theme.
-- Proxies API requests to the backend via Vite's proxy configuration in `vite.config.js`.
+**Important**: Because of this architecture, your files are never uploaded to any server.
 
 ## Available Scripts
 
 | Command | Description |
 |---|---|
-| `npm start` | Parses the PDFs and starts both development servers concurrently. |
-| `npm run dev` | Starts the Express server and Vite frontend concurrently (without parsing). |
-| `npm run parse` | Runs the `parse-pdfs.js` script to manually generate/update `data.json`. |
-| `npm run server` | Starts only the Express backend server on port 3001. |
+| `npm run dev` | Starts the Vite development server. |
 | `npm run build` | Builds the React frontend for production into the `dist/` folder. |
 | `npm run preview` | Previews the production build locally. |
 
-## Deployment
+## Deployment (Zero Cost & Serverless)
 
-While NewsVault is designed primarily as a local application, it can be deployed to a cloud provider. The Express backend is configured to serve the Vite frontend from the `dist/` directory in production.
+Because NewsVault is now a **Static Single Page Application (SPA)** that uses IndexedDB, deploying it is entirely free and doesn't require a Node.js server to run.
 
-### Manual VPS Deployment
+You can deploy it in 3 clicks to platforms like Vercel, Netlify, or GitHub Pages.
 
-1. Clone the repository on your server.
-2. Install dependencies: `npm install`
-3. Add your PDFs to the `docs/` or `pdfs/` directory.
-4. Parse the PDFs: `npm run parse`
-5. Build the frontend: `npm run build`
-6. Start the server: `npm run server` (or use PM2/systemd to keep it running in the background).
+### Vercel Deployment (Recommended)
+
+1. Push your code to GitHub.
+2. Log in to [Vercel](https://vercel.com/) and click "Add New... -> Project".
+3. Import the `newsvault` repository.
+4. Vercel will automatically detect Vite. The build command (`npm run build`) and output directory (`dist`) will be pre-filled.
+5. Click **Deploy**.
+
+### GitHub Pages
+
+1. Install the `gh-pages` package: `npm install -D gh-pages`
+2. Add a `base: '/newsvault/'` property in `vite.config.js`.
+3. Add a script to `package.json`: `"deploy": "vite build && gh-pages -d dist"`
+4. Run `npm run deploy`.
 
 ## Troubleshooting
 
-### No Articles Showing Up
+### PDF Upload Fails
 
-**Error**: The frontend is empty or displays a "data.json not found" error.
+**Error**: "Erro ao processar o arquivo PDF."
 
-**Solution**: Ensure you have run the parsing script after placing your PDFs in the folder:
-```bash
-npm run parse
-```
+**Solution**: The PDF might be encrypted or corrupted. Ensure the file is a standard text-based PDF (not just scanned images). If it is a scanned image, `pdf.js` cannot extract text without OCR.
 
-### Port Conflicts
+### App Won't Start Locally
 
-**Error**: `EADDRINUSE` for port 5173 or 3001.
+**Error**: `EADDRINUSE` for port 5173.
 
-**Solution**: Another process is using the default ports. Stop the conflicting process or change the ports in `vite.config.js` and `server/server.js`.
+**Solution**: Another process is using the default port. Stop the conflicting process or change the port in `vite.config.js`.

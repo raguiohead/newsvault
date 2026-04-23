@@ -25,7 +25,7 @@
   --shadow-hover:    0 12px 40px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(108, 99, 255, 0.15);
   --shadow-drawer:   -20px 0 60px rgba(0, 0, 0, 0.6);
 
-  --font-sans:       'Inter', system-ui, sans-serif;
+  --font-sans:       'Google Sans', 'Product Sans', 'Inter', system-ui, sans-serif;
   --font-serif:      'Lora', Georgia, serif;
 
   --header-h:        64px;
@@ -79,6 +79,12 @@ body::after {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+/* ── Focus & Accessibility ───────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
 
 /* ── Glass utility ───────────────────────────────────────────────────────── */
 .glass {
@@ -306,8 +312,29 @@ body::after {
   align-items: center;
   gap: 8px;
   margin-bottom: 20px;
-  justify-content: flex-end;
+  justify-content: space-between;
 }
+
+.upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  border: none;
+  background: var(--accent);
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.upload-btn:hover { background: #5b54d6; transform: translateY(-1px); }
+.upload-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.upload-btn.primary-btn { padding: 12px 24px; font-size: 16px; border-radius: 12px; }
+.mt-4 { margin-top: 16px; }
 
 .view-toggle-btn {
   display: flex;

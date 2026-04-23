@@ -4,21 +4,16 @@
   "description": "PDF Newsletter Catalog — local web app",
   "type": "module",
   "scripts": {
-    "parse": "node scripts/parse-pdfs.js",
-    "server": "node server/server.js",
-    "dev": "concurrently \"npm run server\" \"vite\"",
+    "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview",
-    "start": "npm run parse && npm run dev"
+    "preview": "vite preview"
   },
   "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^4.18.2",
-    "pdf-parse": "^1.1.1"
+    "idb": "^8.0.3",
+    "pdfjs-dist": "^5.6.205"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",
-    "concurrently": "^8.2.2",
     "gsap": "^3.12.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
