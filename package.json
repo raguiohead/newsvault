@@ -1,0 +1,27 @@
+{
+  "name": "newsvault",
+  "version": "1.0.0",
+  "description": "PDF Newsletter Catalog — local web app",
+  "type": "module",
+  "scripts": {
+    "parse": "node scripts/parse-pdfs.js",
+    "server": "node server/server.js",
+    "dev": "concurrently \"npm run server\" \"vite\"",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "npm run parse && npm run dev"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "pdf-parse": "^1.1.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.1",
+    "concurrently": "^8.2.2",
+    "gsap": "^3.12.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "vite": "^5.2.0"
+  }
+}
