@@ -8,7 +8,7 @@ function formatDate(dateStr) {
   return `${d} de ${months[parseInt(m, 10) - 1]} de ${y}`
 }
 
-export default function ArticleDrawer({ article, onClose }) {
+export default function ArticleDrawer({ article, onClose, onDelete, onUpdate }) {
   const panelRef = useRef(null)
   const overlayRef = useRef(null)
 
@@ -84,13 +84,68 @@ export default function ArticleDrawer({ article, onClose }) {
         {/* Header */}
         <div className="drawer-header">
           <div className="drawer-header-top">
-            <h1 className="drawer-title">{title}</h1>
-            <button
-              className="drawer-close-btn"
-              onClick={handleClose}
-              aria-label="Fechar artigo"
-              title="Fechar (ESC)"
-            >✕</button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
+              <h1 
+                className="drawer-title"
+                contentEditable
+                suppressContentEditableWarning
+                onBlur={(e) => {
+                  const newTitle = e.target.textContent.trim();
+                  if (newTitle && newTitle !== title && onUpdate) {
+                    onUpdate({ ...article, title: newTitle });
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    e.target.blur();
+                  }
+                }}
+                style={{ margin: 0 }}
+              >
+                {title}
+              </h1>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  e.currentTarget.previousElementSibling.focus();
+                  const selection = window.getSelection();
+                  const range = document.createRange();
+                  range.selectNodeContents(e.currentTarget.previousElementSibling);
+                  range.collapse(false);
+                  selection.removeAllRanges();
+                  selection.addRange(range);
+                }}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '1.2rem',
+                  padding: '4px',
+                  opacity: 0.6
+                }}
+                title="Editar título"
+                aria-label="Editar título"
+              >
+                ✏️
+              </button>
+            </div>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                className="drawer-close-btn"
+                style={{ fontSize: '1.2rem', color: '#f43f5e' }}
+                onClick={() => onDelete?.(article.id)}
+                aria-label="Excluir artigo"
+                title="Excluir"
+              >🗑️</button>
+              <button
+                className="drawer-close-btn"
+                onClick={handleClose}
+                aria-label="Fechar artigo"
+                title="Fechar (ESC)"
+              >✕</button>
+            </div>
           </div>
 
           <div className="drawer-meta">
@@ -108,8 +163,6 @@ export default function ArticleDrawer({ article, onClose }) {
             <span>{author}</span>
             <span>·</span>
             <span>{formatDate(date)}</span>
-            <span>·</span>
-            <span>{language === 'pt-BR' ? '🇧🇷 PT' : '🇺🇸 EN'}</span>
             {wordCount > 0 && (
               <>
                 <span>·</span>
@@ -121,10 +174,16 @@ export default function ArticleDrawer({ article, onClose }) {
 
         {/* Body */}
         <div className="drawer-body">
-          <div
-            className="article-prose"
-            dangerouslySetInnerHTML={{ __html: fullHtml }}
-          />
+          {fullHtml ? (
+            <div
+              className="article-prose"
+              dangerouslySetInnerHTML={{ __html: fullHtml }}
+            />
+          ) : (
+            <div className="article-prose" style={{ whiteSpace: 'pre-wrap' }}>
+              {article.content}
+            </div>
+          )}
         </div>
       </div>
     </div>

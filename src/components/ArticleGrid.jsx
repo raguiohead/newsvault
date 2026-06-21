@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import ArticleCard from './ArticleCard.jsx'
 
-export default function ArticleGrid({ articles, onSelect }) {
+export default function ArticleGrid({ articles, onSelect, onDelete, onUpdate }) {
   const gridRef = useRef(null)
   const prevLength = useRef(0)
 
@@ -51,6 +51,8 @@ export default function ArticleGrid({ articles, onSelect }) {
           key={article.id}
           article={article}
           onClick={onSelect}
+          onDelete={onDelete}
+          onUpdate={onUpdate}
         />
       ))}
     </div>

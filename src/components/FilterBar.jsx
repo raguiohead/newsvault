@@ -10,7 +10,7 @@ const ALL_CATEGORIES = [
   { label: 'Geral',                value: 'Geral',                emoji: '📄', color: '#6b7280' },
 ]
 
-export default function FilterBar({ filters, onChange, authors, periods }) {
+export default function FilterBar({ filters, onChange, authors, periods, activeCategories = [] }) {
   const { category, author, language, period } = filters
 
   const set = (key, val) => onChange({ ...filters, [key]: val })
@@ -19,11 +19,13 @@ export default function FilterBar({ filters, onChange, authors, periods }) {
 
   const hasFilters = category || author || language || period
 
+  const visibleCategories = ALL_CATEGORIES.filter(cat => cat.value === '' || activeCategories.includes(cat.value))
+
   return (
     <nav className="filterbar" aria-label="Filtros">
       {/* Category pills */}
       <div className="filter-pills">
-        {ALL_CATEGORIES.map(cat => (
+        {visibleCategories.map(cat => (
           <button
             key={cat.value}
             className={`filter-pill${category === cat.value ? ' active' : ''}`}
@@ -43,29 +45,6 @@ export default function FilterBar({ filters, onChange, authors, periods }) {
 
       {/* Secondary selects */}
       <div className="filter-selects">
-        <select
-          id="filter-author"
-          className="filter-select"
-          value={author}
-          onChange={e => set('author', e.target.value)}
-          aria-label="Filtrar por autor"
-        >
-          <option value="">Todos os autores</option>
-          {authors.map(a => <option key={a} value={a}>{a}</option>)}
-        </select>
-
-        <select
-          id="filter-language"
-          className="filter-select"
-          value={language}
-          onChange={e => set('language', e.target.value)}
-          aria-label="Filtrar por idioma"
-        >
-          <option value="">Todos os idiomas</option>
-          <option value="pt-BR">🇧🇷 Português</option>
-          <option value="en">🇺🇸 English</option>
-        </select>
-
         <select
           id="filter-period"
           className="filter-select"

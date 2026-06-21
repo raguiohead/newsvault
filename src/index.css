@@ -72,6 +72,52 @@ body::after {
   z-index: 0;
 }
 
+/* ── Light Theme ─────────────────────────────────────────────────────────── */
+html[data-theme="light"] {
+  --bg-base:         #f3f4f6;
+  --bg-surface:      rgba(255, 255, 255, 0.75);
+  --bg-elevated:     rgba(255, 255, 255, 0.95);
+  --bg-glass:        rgba(255, 255, 255, 0.85);
+
+  --accent:          #4f46e5;
+  --accent-glow:     rgba(79, 70, 229, 0.15);
+  --accent-2:        #059669;
+
+  --text-primary:    #111827;
+  --text-secondary:  #4b5563;
+  --text-muted:      #6b7280;
+
+  --border:          rgba(0, 0, 0, 0.08);
+  --border-hover:    rgba(0, 0, 0, 0.16);
+
+  --shadow-card:     0 4px 20px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03);
+  --shadow-hover:    0 12px 30px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(79, 70, 229, 0.12);
+  --shadow-drawer:   -20px 0 60px rgba(0, 0, 0, 0.08);
+}
+
+html[data-theme="light"] body::before {
+  background: radial-gradient(ellipse, rgba(79, 70, 229, 0.04) 0%, transparent 70%);
+}
+html[data-theme="light"] body::after {
+  background: radial-gradient(ellipse, rgba(5, 150, 105, 0.03) 0%, transparent 70%);
+}
+
+/* ── Background Patterns ─────────────────────────────────────────────────── */
+html[data-bg="grid"] body {
+  background-image: 
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+html[data-bg="dots"] body {
+  background-image: radial-gradient(var(--border) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+html[data-bg="grid"] body::before, html[data-bg="grid"] body::after,
+html[data-bg="dots"] body::before, html[data-bg="dots"] body::after {
+  display: none;
+}
+
 #root { position: relative; z-index: 1; }
 
 /* ── Scrollbar ───────────────────────────────────────────────────────────── */
@@ -118,7 +164,7 @@ body::after {
   right: 0;
   height: var(--header-h);
   z-index: 100;
-  background: rgba(9, 9, 15, 0.88);
+  background: var(--bg-glass);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
@@ -208,7 +254,7 @@ body::after {
   right: 0;
   height: var(--filterbar-h);
   z-index: 99;
-  background: rgba(9, 9, 15, 0.80);
+  background: var(--bg-glass);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border);
@@ -289,7 +335,7 @@ body::after {
   color: var(--text-primary);
 }
 
-.filter-select option { background: #1a1a2e; }
+select option { background: var(--bg-base); color: var(--text-primary); }
 
 .clear-filters-btn {
   background: none;
@@ -346,7 +392,7 @@ body::after {
   font-weight: 500;
   font-family: var(--font-sans);
   border: 1px solid var(--border);
-  background: var(--bg-elevated);
+  background: var(--bg-base);
   color: var(--text-muted);
   cursor: pointer;
   transition: all 0.2s;
@@ -375,7 +421,7 @@ body::after {
 
 /* ── Article Card ────────────────────────────────────────────────────────── */
 .article-card {
-  background: var(--bg-surface);
+  background: var(--bg-base);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 20px;
@@ -707,8 +753,16 @@ body::after {
 /* ── Empty / Loading States ──────────────────────────────────────────────── */
 .state-container {
   text-align: center;
-  padding: 80px 24px;
+  padding: 64px 48px;
   color: var(--text-muted);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: var(--shadow-card);
+  max-width: 540px;
+  margin: 0 auto;
 }
 
 .state-icon {

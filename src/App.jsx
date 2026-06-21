@@ -5,7 +5,10 @@ import ArticleGrid from './components/ArticleGrid.jsx'
 import ArticleList from './components/ArticleList.jsx'
 import ViewToggle from './components/ViewToggle.jsx'
 import ArticleDrawer from './components/ArticleDrawer.jsx'
-import { getArticles, addArticle } from './db.js'
+import AboutModal from './components/AboutModal.jsx'
+import SettingsModal from './components/SettingsModal.jsx'
+import EmlConverterTab from './components/EmlConverterTab.jsx'
+import { getArticles, addArticle, deleteArticle, clearArticles } from './db.js'
 import { parsePdfFile } from './pdfParser.js'
 
 function getMonthYear(dateStr) {
@@ -24,7 +27,23 @@ export default function App() {
   const [view, setView] = useState('grid')
   const [selected, setSelected] = useState(null)
   const [uploading, setUploading] = useState(false)
+  const [isAboutOpen, setIsAboutOpen] = useState(false)
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark')
+  const [bg, setBg] = useState(() => localStorage.getItem('bg') || 'default')
+  const [activeTab, setActiveTab] = useState('library')
+  const [sortOrder, setSortOrder] = useState('desc')
   const fileInputRef = useRef(null)
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    localStorage.setItem('theme', theme)
+  }, [theme])
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-bg', bg)
+    localStorage.setItem('bg', bg)
+  }, [bg])
 
   // Fetch articles from IndexedDB
   const loadArticles = async () => {
@@ -43,6 +62,11 @@ export default function App() {
   useEffect(() => { loadArticles() }, [])
 
   // Derived filter options
+  const activeCategories = useMemo(() => {
+    const set = new Set(articles.map(a => a.category).filter(Boolean))
+    return [...set]
+  }, [articles])
+
   const authors = useMemo(() => {
     const set = new Set(articles.map(a => a.author).filter(Boolean))
     return [...set].sort()
@@ -61,7 +85,7 @@ export default function App() {
   // Filter + search logic
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim()
-    return articles.filter(a => {
+    let results = articles.filter(a => {
       if (filters.category && a.category !== filters.category) return false
       if (filters.author && a.author !== filters.author) return false
       if (filters.language && a.language !== filters.language) return false
@@ -72,7 +96,15 @@ export default function App() {
       }
       return true
     })
-  }, [articles, filters, query])
+
+    results.sort((a, b) => {
+      const dateA = a.date ? new Date(a.date).getTime() : 0
+      const dateB = b.date ? new Date(b.date).getTime() : 0
+      return sortOrder === 'desc' ? dateB - dateA : dateA - dateB
+    })
+
+    return results
+  }, [articles, filters, query, sortOrder])
 
   // File Upload Logic
   const handleFileUpload = async (e) => {
@@ -96,6 +128,24 @@ export default function App() {
     }
   }
 
+  const handleDelete = async (id) => {
+    if (!confirm('Tem certeza que deseja excluir este PDF?')) return
+    await deleteArticle(id)
+    if (selected?.id === id) setSelected(null)
+    await loadArticles()
+  }
+
+  const handleUpdate = async (updatedArticle) => {
+    await addArticle(updatedArticle)
+    await loadArticles()
+  }
+
+  const handleClearDatabase = async () => {
+    await clearArticles()
+    await loadArticles()
+    setSelected(null)
+  }
+
   // ── Render ──────────────────────────────────────────────────────────────────
 
   if (loading) {
@@ -117,6 +167,10 @@ export default function App() {
         onReindex={() => fileInputRef.current?.click()}
         reindexing={uploading}
         isClientSide={true}
+        onOpenAbout={() => setIsAboutOpen(true)}
+        onOpenSettings={() => setIsSettingsOpen(true)}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
       />
 
       {/* Hidden file input for PDF upload */}
@@ -130,13 +184,19 @@ export default function App() {
         aria-label="Upload PDF files"
       />
 
-      {articles.length > 0 ? (
+      {activeTab === 'eml' ? (
+        <EmlConverterTab onConverted={() => {
+          loadArticles()
+          setActiveTab('library')
+        }} />
+      ) : articles.length > 0 ? (
         <>
           <FilterBar
             filters={filters}
             onChange={setFilters}
             authors={authors}
             periods={periods}
+            activeCategories={activeCategories}
           />
 
           <main className="main-content">
@@ -149,12 +209,31 @@ export default function App() {
               >
                 {uploading ? 'Processando...' : '+ Adicionar PDFs'}
               </button>
-              <ViewToggle view={view} onChange={setView} />
+              
+              <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <select 
+                  value={sortOrder} 
+                  onChange={(e) => setSortOrder(e.target.value)}
+                  style={{
+                    background: 'var(--surface)',
+                    color: 'var(--text-primary)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '8px',
+                    padding: '6px 12px',
+                    outline: 'none'
+                  }}
+                  aria-label="Ordenar por data"
+                >
+                  <option value="desc">Mais recentes</option>
+                  <option value="asc">Mais antigos</option>
+                </select>
+                <ViewToggle view={view} onChange={setView} />
+              </div>
             </div>
 
             {view === 'grid'
-              ? <ArticleGrid articles={filtered} onSelect={setSelected} />
-              : <ArticleList articles={filtered} onSelect={setSelected} />
+              ? <ArticleGrid articles={filtered} onSelect={setSelected} onDelete={handleDelete} onUpdate={handleUpdate} />
+              : <ArticleList articles={filtered} onSelect={setSelected} onDelete={handleDelete} onUpdate={handleUpdate} />
             }
           </main>
         </>
@@ -178,6 +257,23 @@ export default function App() {
         <ArticleDrawer
           article={selected}
           onClose={() => setSelected(null)}
+          onDelete={handleDelete}
+          onUpdate={(updated) => { handleUpdate(updated); setSelected(updated) }}
+        />
+      )}
+
+      {isAboutOpen && (
+        <AboutModal onClose={() => setIsAboutOpen(false)} />
+      )}
+
+      {isSettingsOpen && (
+        <SettingsModal 
+          onClose={() => setIsSettingsOpen(false)} 
+          theme={theme}
+          setTheme={setTheme}
+          bg={bg}
+          setBg={setBg}
+          onClearDatabase={handleClearDatabase}
         />
       )}
     </div>

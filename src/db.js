@@ -32,3 +32,8 @@ export async function deleteArticle(id) {
   const db = await initDB()
   await db.delete('articles', id)
 }
+
+export async function clearArticles() {
+  const db = await initDB()
+  await db.clear('articles')
+}
