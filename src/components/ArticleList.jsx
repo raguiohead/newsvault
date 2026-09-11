@@ -59,6 +59,23 @@ function ArticleListItem({ article, onSelect, onDelete, onUpdate }) {
         >
           {article.title}
         </span>
+        {article.source === 'outlook' && (
+          <span
+            style={{
+              background: 'rgba(0, 120, 212, 0.15)',
+              color: '#00a2ed',
+              border: '1px solid rgba(0, 120, 212, 0.3)',
+              fontSize: '10px',
+              padding: '1px 6px',
+              borderRadius: '10px',
+              marginLeft: '6px',
+              whiteSpace: 'nowrap'
+            }}
+            title="Sincronizado do Outlook"
+          >
+            📬 Outlook
+          </span>
+        )}
       </div>
       <span className="list-author">{article.author}</span>
       <span className="list-date">{formatDate(article.date)}</span>

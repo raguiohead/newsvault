@@ -147,17 +147,33 @@ export default function ArticleCard({ article, onClick, onDelete, onUpdate }) {
       onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && onClick(article)}
     >
       <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-        <span
-          className="card-category-badge"
-          style={{
-            backgroundColor: categoryColor + '22',
-            color: categoryColor,
-            border: `1px solid ${categoryColor}44`,
-          }}
-        >
-          <span>{categoryEmoji}</span>
-          <span>{category}</span>
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span
+            className="card-category-badge"
+            style={{
+              backgroundColor: categoryColor + '22',
+              color: categoryColor,
+              border: `1px solid ${categoryColor}44`,
+            }}
+          >
+            <span>{categoryEmoji}</span>
+            <span>{category}</span>
+          </span>
+          {article.source === 'outlook' && (
+            <span
+              className="card-category-badge"
+              style={{
+                backgroundColor: 'rgba(0, 120, 212, 0.15)',
+                color: '#00a2ed',
+                border: '1px solid rgba(0, 120, 212, 0.3)',
+                fontSize: '11px'
+              }}
+              title="Sincronizado do Outlook"
+            >
+              📬 Outlook
+            </span>
+          )}
+        </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', position: 'relative' }} ref={menuRef}>
           <button
             style={{

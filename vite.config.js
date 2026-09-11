@@ -4,6 +4,7 @@ import fs from 'fs'
 import path from 'path'
 import { exec } from 'child_process'
 import os from 'os'
+import { getOutlookStatus, syncOutlookFolder } from './server/outlookService.js'
 
 function emlConverterPlugin() {
   return {
@@ -60,8 +61,53 @@ function emlConverterPlugin() {
   }
 }
 
+function outlookSyncPlugin() {
+  return {
+    name: 'outlook-sync',
+    configureServer(server) {
+      server.middlewares.use('/api/outlook/status', async (req, res, next) => {
+        if (req.method !== 'GET') return next()
+        try {
+          const status = await getOutlookStatus()
+          res.setHeader('Content-Type', 'application/json')
+          res.end(JSON.stringify(status))
+        } catch (err) {
+          console.error('[Outlook API] Error in /api/outlook/status:', err)
+          res.statusCode = 500
+          res.setHeader('Content-Type', 'application/json')
+          res.end(JSON.stringify({ error: err.message }))
+        }
+      })
+
+      server.middlewares.use('/api/outlook/sync', (req, res, next) => {
+        if (req.method !== 'POST') return next()
+        let body = ''
+        req.on('data', chunk => { body += chunk })
+        req.on('end', async () => {
+          try {
+            const params = body ? JSON.parse(body) : {}
+            const result = await syncOutlookFolder({
+              folderId: params.folderId,
+              top: params.top || 25,
+              unreadOnly: params.unreadOnly !== false,
+              markAsRead: Boolean(params.markAsRead)
+            })
+            res.setHeader('Content-Type', 'application/json')
+            res.end(JSON.stringify(result))
+          } catch (err) {
+            console.error('[Outlook API] Error in /api/outlook/sync:', err)
+            res.statusCode = 500
+            res.setHeader('Content-Type', 'application/json')
+            res.end(JSON.stringify({ error: err.message }))
+          }
+        })
+      })
+    }
+  }
+}
+
 export default defineConfig({
-  plugins: [react(), emlConverterPlugin()],
+  plugins: [react(), emlConverterPlugin(), outlookSyncPlugin()],
   server: {
     port: 5173
   },

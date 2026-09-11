@@ -41,6 +41,13 @@ export default function Header({ query, onQueryChange, count, total, onOpenAbout
             Biblioteca
           </button>
           <button 
+            className={`view-toggle-btn ${activeTab === 'outlook' ? 'active' : ''}`}
+            onClick={() => onTabChange?.('outlook')}
+            style={{ padding: '4px 12px', background: activeTab === 'outlook' ? 'var(--primary)' : 'transparent', color: activeTab === 'outlook' ? '#fff' : 'inherit', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+          >
+            📬 Outlook
+          </button>
+          <button 
             className={`view-toggle-btn ${activeTab === 'eml' ? 'active' : ''}`}
             onClick={() => onTabChange?.('eml')}
             style={{ padding: '4px 12px', background: activeTab === 'eml' ? 'var(--primary)' : 'transparent', color: activeTab === 'eml' ? '#fff' : 'inherit', border: 'none', borderRadius: '4px', cursor: 'pointer' }}

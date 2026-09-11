@@ -37,36 +37,36 @@ export async function parsePdfFile(file) {
   const lowerText = fullText.toLowerCase()
   let category = 'Geral'
   let categoryEmoji = '📄'
-  let categoryColor = '#6b7280'
+  let categoryColor = '#64748b'
 
   if (lowerText.match(/saúde|fitness|treino|dieta|nutrição|exercício|médico/)) {
     category = 'Saúde & Fitness'
     categoryEmoji = '🏋️'
-    categoryColor = '#f97316'
+    categoryColor = '#ea580c'
   } else if (lowerText.match(/produtividade|hábito|foco|gestão de tempo|rotina/)) {
     category = 'Produtividade'
     categoryEmoji = '🧠'
-    categoryColor = '#8b5cf6'
+    categoryColor = '#6366f1'
   } else if (lowerText.match(/negócio|carreira|empresa|startup|venda|mercado|trabalho/)) {
     category = 'Negócios & Carreira'
     categoryEmoji = '💼'
-    categoryColor = '#06b6d4'
+    categoryColor = '#0284c7'
   } else if (lowerText.match(/dados|tecnologia|programação|software|ia|inteligência artificial|tech/)) {
     category = 'Dados & Tecnologia'
     categoryEmoji = '📊'
-    categoryColor = '#10b981'
+    categoryColor = '#059669'
   } else if (lowerText.match(/escrita|criatividade|arte|design|criação/)) {
     category = 'Escrita & Criatividade'
     categoryEmoji = '✍️'
-    categoryColor = '#f59e0b'
+    categoryColor = '#d97706'
   } else if (lowerText.match(/livro|aprendizado|estudo|curso|leitura|conhecimento/)) {
     category = 'Livros & Aprendizado'
     categoryEmoji = '📚'
-    categoryColor = '#ec4899'
+    categoryColor = '#db2777'
   } else if (lowerText.match(/vida|filosofia|reflexão|estoicismo|psicologia/)) {
     category = 'Vida & Filosofia'
     categoryEmoji = '🌱'
-    categoryColor = '#84cc16'
+    categoryColor = '#16a34a'
   }
   
   return {

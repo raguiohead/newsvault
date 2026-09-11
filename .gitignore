@@ -1,5 +1,15 @@
 node_modules/
 .env
+.env.*
+!.env.example
 dist/
 pdfs/
 docs/
+
+# Arquivos gerados e dados locais
+*.pdf
+eml2pdf/
+__pycache__/
+*.py[cod]
+.venv/
+venv/

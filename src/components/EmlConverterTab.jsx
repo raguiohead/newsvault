@@ -12,19 +12,32 @@ export default function EmlConverterTab({ onConverted }) {
     const files = Array.from(e.target.files)
     if (!files.length) return
     
+    const confirmMessage = `Você selecionou ${files.length} arquivo(s) para conversão. Por favor, não feche ou saia da página até que a operação seja concluída. Deseja iniciar?`
+    if (!window.confirm(confirmMessage)) {
+      if (fileInputRef.current) fileInputRef.current.value = ''
+      return
+    }
+    
     setLoading(true)
     setError(null)
     setProgress({ current: 0, total: files.length, fileName: '' })
+    
+    const handleBeforeUnload = (event) => {
+      event.preventDefault()
+      event.returnValue = '' // Requerido por navegadores para exibir o prompt nativo
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload)
     
     try {
       let currentFileIndex = 0;
       for (const file of files) {
         currentFileIndex++;
         if (!file.name.toLowerCase().endsWith('.eml')) {
-          console.warn(`Pulo de arquivo não-EML: ${file.name}`)
+          console.warn(`[Conversão] Pulando arquivo não-EML: ${file.name}`)
           continue
         }
 
+        console.log(`[Conversão] Iniciando arquivo ${currentFileIndex}/${files.length}: ${file.name}`)
         setProgress({ current: currentFileIndex, total: files.length, fileName: file.name })
 
         // Send raw file data
@@ -40,6 +53,7 @@ export default function EmlConverterTab({ onConverted }) {
 
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}))
+          console.error(`[Conversão] Erro ao converter ${file.name}:`, errData)
           throw new Error(errData.error || `Erro HTTP ${res.status} ao converter ${file.name}`)
         }
 
@@ -50,16 +64,19 @@ export default function EmlConverterTab({ onConverted }) {
         // Feed into pdfParser and indexedDB
         const parsedData = await parsePdfFile(pdfFile)
         await addArticle(parsedData)
+        console.log(`[Conversão] Concluído com sucesso: ${file.name}`)
       }
       
+      console.log('[Conversão] Todas as operações foram finalizadas.')
       onConverted() // Return to library and reload
     } catch (err) {
-      console.error('Error converting EML:', err)
+      console.error('[Conversão] Processo interrompido com erro:', err)
       setError(err.message || 'Erro desconhecido ao converter EML.')
     } finally {
       setLoading(false)
       setProgress({ current: 0, total: 0, fileName: '' })
       if (fileInputRef.current) fileInputRef.current.value = ''
+      window.removeEventListener('beforeunload', handleBeforeUnload)
     }
   }
 

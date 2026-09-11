@@ -8,6 +8,7 @@ import ArticleDrawer from './components/ArticleDrawer.jsx'
 import AboutModal from './components/AboutModal.jsx'
 import SettingsModal from './components/SettingsModal.jsx'
 import EmlConverterTab from './components/EmlConverterTab.jsx'
+import OutlookSyncTab from './components/OutlookSyncTab.jsx'
 import { getArticles, addArticle, deleteArticle, clearArticles } from './db.js'
 import { parsePdfFile } from './pdfParser.js'
 
@@ -184,7 +185,12 @@ export default function App() {
         aria-label="Upload PDF files"
       />
 
-      {activeTab === 'eml' ? (
+      {activeTab === 'outlook' ? (
+        <OutlookSyncTab onConverted={() => {
+          loadArticles()
+          setActiveTab('library')
+        }} />
+      ) : activeTab === 'eml' ? (
         <EmlConverterTab onConverted={() => {
           loadArticles()
           setActiveTab('library')
@@ -201,14 +207,24 @@ export default function App() {
 
           <main className="main-content">
             <div className="view-controls">
-              <button 
-                className="upload-btn" 
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploading}
-                aria-label="Adicionar novos PDFs"
-              >
-                {uploading ? 'Processando...' : '+ Adicionar PDFs'}
-              </button>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <button 
+                  className="upload-btn primary-btn" 
+                  onClick={() => setActiveTab('outlook')}
+                  aria-label="Sincronizar do Outlook"
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                >
+                  📬 Sincronizar Outlook
+                </button>
+                <button 
+                  className="upload-btn" 
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  aria-label="Adicionar novos PDFs"
+                >
+                  {uploading ? 'Processando...' : '+ Adicionar PDFs'}
+                </button>
+              </div>
               
               <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px', alignItems: 'center' }}>
                 <select 
@@ -240,15 +256,20 @@ export default function App() {
       ) : (
         <main className="main-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
           <div className="state-container">
-            <div className="state-icon">📄</div>
+            <div className="state-icon">📬</div>
             <h2 className="state-title">Sua biblioteca está vazia</h2>
             <p className="state-desc">
-              Adicione seus PDFs para começar a ler suas newsletters.<br />
-              O processamento ocorre 100% no seu navegador!
+              Sincronize suas newsletters diretamente do Outlook ou adicione seus PDFs locais.<br />
+              O processamento ocorre de forma rápida e segura!
             </p>
-            <button className="upload-btn primary-btn mt-4" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
-              {uploading ? <><span className="spinner" /> Processando…</> : '+ Adicionar seus PDFs'}
-            </button>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '16px' }}>
+              <button className="upload-btn primary-btn" onClick={() => setActiveTab('outlook')}>
+                📬 Sincronizar do Outlook
+              </button>
+              <button className="upload-btn" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+                {uploading ? <><span className="spinner" /> Processando…</> : '+ Adicionar PDFs'}
+              </button>
+            </div>
           </div>
         </main>
       )}
